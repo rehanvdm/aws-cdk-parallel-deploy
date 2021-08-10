@@ -1,0 +1,5 @@
+{
+  "AWSProfileName": "<The AWS profile name used by the CDK commands>",
+  "AWSAccountID": "<The AWS account used by the CDK commands>",
+  "AWSProfileRegion": "<The AWS region used the CDK commands>"
+}

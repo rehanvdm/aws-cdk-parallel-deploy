@@ -1,0 +1,4 @@
+{
+    "app": "node --unhandled-rejections=strict index",
+    "versionReporting": false
+}
