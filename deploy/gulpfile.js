@@ -11,8 +11,8 @@ const paths = {
   workingDir: path.resolve(__dirname + "/../"),
   configFile: path.resolve(__dirname + "/../config.json"),
   configPathSandbox: path.resolve(__dirname + "/config.dev.sandbox.yaml"),
-  cdkExe: path.resolve(__dirname + "/../node_modules/aws-cdk/bin/cdk"),
-  tscExe: path.resolve(__dirname + "/../node_modules/typescript/bin/tsc")
+  // cdkExe: path.resolve(__dirname + "/../node_modules/aws-cdk/bin/cdk"),
+  // tscExe: path.resolve(__dirname + "/../node_modules/typescript/bin/tsc")
 };
 const stackNames = {
   infra: "parallel-deploy-infra",
@@ -89,9 +89,9 @@ gulp.task("diff", async callback =>
     printConfig(config);
 
     /* Convert TSC to JS dor CDK */
-    await CommandExec("node", [paths.tscExe], paths.workingDir);
-    await CommandExec("node",[`${paths.cdkExe} diff "*"  --profile ${config.AWSProfileName} || echo Done`],
-      paths.workingDir);
+    await CommandExec("npm", ["run build"], paths.workingDir);
+
+    await CommandExec("cdk",[`diff "*"  --profile ${config.AWSProfileName} || echo Done`], paths.workingDir);
 
     callback();
   }
@@ -109,14 +109,14 @@ gulp.task("deploy", async callback =>
     printConfig(config);
 
     /* Convert TSC to JS dor CDK */
-    await CommandExec("node", [paths.tscExe], paths.workingDir);
+    await CommandExec("npm", ["run build"], paths.workingDir);
 
     /* Create Cloud Assembly */
-    await CommandExec("node",[`${paths.cdkExe} synth "${stackNames.infra}" --profile ${config.AWSProfileName} ` +
+    await CommandExec("cdk",[`synth "${stackNames.infra}" --profile ${config.AWSProfileName} ` +
       ` --output ${paths.cloudAssemblyOutPath}`], paths.workingDir);
 
     /* Deploy Infra stack */
-    await CommandExec("node",[`${paths.cdkExe} deploy "${stackNames.infra}" --require-approval=never ` +
+    await CommandExec("cdk",[`deploy "${stackNames.infra}" --require-approval=never ` +
       ` --profile ${config.AWSProfileName} --progress=events --app ${paths.cloudAssemblyOutPath}`], paths.workingDir);
 
     /* Deploy Service Stacks in parallel */
@@ -125,8 +125,8 @@ gulp.task("deploy", async callback =>
     for (let stackName of serviceStacks)
     {
       arrPromises.push(
-        CommandExec("node",[`${paths.cdkExe} deploy "${stackName}" --require-approval=never ` +
-        ` --profile ${config.AWSProfileName} --progress=events --exclusively true --app ${paths.cloudAssemblyOutPath}`],
+        CommandExec("cdk",[`deploy "${stackName}" --require-approval=never ` +
+        ` --profile ${config.AWSProfileName} --progress=events --app ${paths.cloudAssemblyOutPath} --exclusively true`],
         paths.workingDir, true, process.env, `[${stackName}] `)
       );
     }
@@ -140,3 +140,22 @@ gulp.task("deploy", async callback =>
   }
 });
 
+gulp.task("destroy", async callback =>
+{
+  try
+  {
+    let config = await getConfig();
+    printConfig(config);
+
+    /* Convert TSC to JS dor CDK */
+    await CommandExec("npm", ["run build"], paths.workingDir);
+
+    await CommandExec("cdk",[`destroy "*" -f  --profile ${config.AWSProfileName} || echo Done`], paths.workingDir);
+
+    callback();
+  }
+  catch (e)
+  {
+    callback(e);
+  }
+});

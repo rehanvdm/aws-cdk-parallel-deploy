@@ -6,6 +6,7 @@
   "license": "MIT",
   "devDependencies": {},
   "scripts": {
+    "build": "tsc",
     "diff": "gulp --color --gulpfile deploy/gulpfile.js diff",
     "deploy": "gulp --color --gulpfile deploy/gulpfile.js deploy"
   },
