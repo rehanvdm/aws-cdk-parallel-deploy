@@ -8,7 +8,8 @@
   "scripts": {
     "build": "tsc",
     "diff": "gulp --color --gulpfile deploy/gulpfile.js diff",
-    "deploy": "gulp --color --gulpfile deploy/gulpfile.js deploy"
+    "deploy": "gulp --color --gulpfile deploy/gulpfile.js deploy",
+    "destroy": "gulp --color --gulpfile deploy/gulpfile.js destroy"
   },
   "dependencies": {
     "aws-cdk": "1.117.0",
